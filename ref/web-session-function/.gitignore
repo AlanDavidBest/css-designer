@@ -1,0 +1,13 @@
+.webpack
+.serverless
+node_modules
+dist
+*.log
+.nyc_output
+coverage
+.DS_Store
+.vscode
+cucumber.json
+log
+*.lock
+yarn-error.log

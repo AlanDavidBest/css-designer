@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="croppie.js"></script>
+    <script>
+        let verticalOffset = 0;
+        var prod = document.getElementById('prod')
+        var pre = document.getElementById('pre')
+
+        document.addEventListener('keydown', (key) => { 
+            var root = document.querySelector(':root');
+            if (key.keyCode === 188) {
+                verticalOffset--;
+                root.style.setProperty('--verticalOffset', verticalOffset + 'px');
+            }
+            if (key.keyCode === 190) {
+                verticalOffset++;
+                root.style.setProperty('--verticalOffset', verticalOffset + 'px');
+            }
+            console.log('VerticalOffset ' + verticalOffset)
+            console.log('CSS: ' + getComputedStyle(root).getPropertyValue('--verticalOffset'));
+        })
+    </script>
+    <style>
+        * {
+            background-color: blue;
+        }
+        root: {
+            --verticalOffset: 0;
+        }
+        .imageProd {
+            width: 100%;
+            opacity: 50%;
+            z-index: 100;
+            position: relative;
+            top: 0px;
+            left: 0px;
+        }
+        .imagePre {
+            width: 104%;
+            opacity: 100%;
+            position: absolute;
+            top: var(--verticalOffset);
+            left: 0px;
+            mix-blend-mode: screen;
+        }
+        .frame {
+            position: absolute;
+            top: 50px;
+            left: 0px;
+            width: 800px;
+            opacity: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="frame">
+        <img src="./prod.png" id="prod"
+            class="imageProd">
+
+
+        <img src="./pre.png" id="pre"
+            class="imagePre">
+    </div>
+</body>
+</html>

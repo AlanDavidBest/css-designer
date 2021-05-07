@@ -1,0 +1,40 @@
+pipeline {
+    agent { label 'Centos7_Agent' }
+    stages {
+        stage('Create Web Session Image') {
+            steps {
+              sh 'docker build -t web-session-service .'
+          }
+        }
+        stage('Build & Tests') {
+            steps {
+                sh 'docker run --rm --mount src="$(pwd)",target=/repo/,type=bind -e NODE_ENV=development -e AWS_ACCESS_KEY_ID=DummyId -e AWS_SECRET_ACCESS_KEY=DummySecretKey web-session-service ./ci/run_tests.sh'
+            }
+        }
+        stage('Deploy Staging') {
+            when {
+              expression {
+                currentBuild.result == null || currentBuild.result == 'SUCCESS'
+              }
+            }
+            steps {
+                sh 'docker run --rm --mount src="$(pwd)",target=/repo/,type=bind web-session-service ./ci/deploy_staging.sh'
+            }
+        }
+        stage('Tag github') {
+            when {
+              expression {
+                currentBuild.result == null || currentBuild.result == 'SUCCESS'
+              }
+            }
+            steps {
+                sh './ci/tag_git.sh'
+            }
+        }
+        stage('Remove Docker Image') {
+            steps {
+                sh 'docker rmi -f web-session-service'
+            }
+        }
+    }
+}

@@ -1,0 +1,32 @@
+pipeline {	
+    agent { label 'Centos7_Agent' }	
+    stages {	
+        stage('Build Image') {	
+            steps {	
+                script {
+                    notifyBitbucket()
+                }
+                sh 'docker build -t web-session-service .'	
+          }	
+        }
+        stage('Install dependencies') {	
+            steps {	
+                sh 'docker run --rm --mount src="$(pwd)",target=/repo/,type=bind web-session-service yarn'
+          }	
+        }		
+        stage('Run Unit Tests') {	
+            steps {	
+              sh 'docker run --rm --mount src="$(pwd)",target=/repo/,type=bind web-session-service yarn test'
+          }	
+        }
+    }	
+    post {	
+        always {		
+            script {
+                currentBuild.result = currentBuild.result ?: 'SUCCESS'
+                notifyBitbucket()
+            }
+            sh 'docker rmi web-session-service'
+        }
+    }	
+}

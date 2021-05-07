@@ -1,0 +1,28 @@
+pipeline {
+    agent { label 'master_agent' }
+    parameters {
+        choice(choices: 'dev\nstaging\nprod', description: 'Stage for deployment e.g. test or prod', name: 'Stage')
+    }
+    stages {
+        stage('Create Docker Image') {
+            steps {
+              sh 'docker build -t web-session-service .'
+          }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker run --rm --mount src="$(pwd)",target=/repo/,type=bind -e NODE_ENV=development -e AWS_ACCESS_KEY_ID=DummyId -e AWS_SECRET_ACCESS_KEY=DummySecretKey web-session-service ./ci/run_tests.sh'
+            }
+        }
+        stage('Deploy Staging') {
+            steps {
+                sh 'docker run --rm --mount src="$(pwd)",target=/repo/,type=bind web-session-service ./dev/deploy_dev.sh'
+            }
+        }
+        stage('Remove Docker Image') {
+            steps {
+                sh 'docker rmi -f web-session-service'
+            }
+        }
+    }
+}
